@@ -40,10 +40,17 @@ export default function SignupPage() {
   const onSubmit = async (data: SignupFormData) => {
     setServerError(null)
 
-    // Sign up the user
+    // Sign up the user — pass username/display_name as metadata so the
+    // DB trigger can create the profile even before email confirmation
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
+      options: {
+        data: {
+          username: data.username,
+          display_name: data.display_name,
+        },
+      },
     })
 
     if (authError) {
@@ -56,26 +63,31 @@ export default function SignupPage() {
       return
     }
 
-    // Insert profile
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: authData.user.id,
-      username: data.username,
-      display_name: data.display_name,
-    })
+    // If we already have a session (email confirmation disabled), insert
+    // the profile directly so we can enforce the unique username constraint
+    if (authData.session) {
+      const { error: profileError } = await supabase.from('profiles').insert({
+        id: authData.user.id,
+        username: data.username,
+        display_name: data.display_name,
+      })
 
-    if (profileError) {
-      if (profileError.code === '23505') {
-        setServerError('That username is already taken. Please choose another.')
-      } else {
-        setServerError(profileError.message)
+      if (profileError) {
+        if (profileError.code === '23505') {
+          setServerError('That username is already taken. Please choose another.')
+        } else {
+          setServerError(profileError.message)
+        }
+        await supabase.auth.signOut()
+        return
       }
-      // Clean up: sign out so they can try again
-      await supabase.auth.signOut()
-      return
-    }
 
-    router.push('/map')
-    router.refresh()
+      router.push('/map')
+      router.refresh()
+    } else {
+      // Email confirmation required — profile will be created by the DB trigger
+      setServerError('Check your email to confirm your account before signing in.')
+    }
   }
 
   return (
