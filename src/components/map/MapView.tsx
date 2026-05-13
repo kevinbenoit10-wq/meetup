@@ -6,14 +6,13 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import { format } from 'date-fns'
 import type { Ping } from '@/lib/types'
 
+const MAP_STYLE = 'mapbox://styles/mapbox/streets-v12'
+
 interface MapViewProps {
   pings: Ping[]
   onPingClick: (ping: Ping) => void
+  onMapClick?: (lat: number, lng: number) => void
 }
-
-const MAP_STYLE = 'mapbox://styles/mapbox/streets-v12'
-const DEFAULT_LON = 4.35
-const DEFAULT_LAT = 50.85
 
 function PingMarker({ ping, onClick }: { ping: Ping; onClick: () => void }) {
   const timeStr = format(new Date(ping.event_at), 'HH:mm')
@@ -36,14 +35,10 @@ function PingMarker({ ping, onClick }: { ping: Ping; onClick: () => void }) {
   )
 }
 
-export default function MapView({ pings, onPingClick }: MapViewProps) {
+export default function MapView({ pings, onPingClick, onMapClick }: MapViewProps) {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
-  const [viewState, setViewState] = useState({
-    longitude: DEFAULT_LON,
-    latitude: DEFAULT_LAT,
-    zoom: 11,
-  })
+  const [viewState, setViewState] = useState({ longitude: 4.35, latitude: 50.85, zoom: 11 })
 
   useEffect(() => {
     if (!navigator.geolocation) return
@@ -56,7 +51,7 @@ export default function MapView({ pings, onPingClick }: MapViewProps) {
   if (!token) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100">
-        <p className="text-sm text-gray-500">Mapbox token ontbreekt — stel NEXT_PUBLIC_MAPBOX_TOKEN in</p>
+        <p className="text-sm text-gray-500">Stel NEXT_PUBLIC_MAPBOX_TOKEN in</p>
       </div>
     )
   }
@@ -68,6 +63,8 @@ export default function MapView({ pings, onPingClick }: MapViewProps) {
       onMove={(evt) => setViewState(evt.viewState)}
       style={{ width: '100%', height: '100%' }}
       mapStyle={MAP_STYLE}
+      cursor={onMapClick ? 'crosshair' : 'grab'}
+      onClick={(evt) => onMapClick?.(evt.lngLat.lat, evt.lngLat.lng)}
     >
       <NavigationControl position="top-right" />
       {pings.map((ping) => (
