@@ -16,20 +16,37 @@ interface MapViewProps {
 
 function PingMarker({ ping, onClick }: { ping: Ping; onClick: () => void }) {
   const timeStr = format(new Date(ping.event_at), 'HH:mm')
-  const hostName = ping.host?.display_name ?? 'Someone'
 
   return (
-    <Marker longitude={ping.lng} latitude={ping.lat} anchor="bottom" onClick={(e) => { e.originalEvent.stopPropagation(); onClick() }}>
-      <div
-        className="flex items-center gap-1.5 bg-white border-2 border-indigo-500 rounded-full px-3 py-1.5 shadow-md cursor-pointer hover:shadow-lg hover:scale-105 transition-all select-none"
-        style={{ fontSize: '12px', whiteSpace: 'nowrap' }}
-      >
-        <svg className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
-        </svg>
-        <span className="font-semibold text-gray-800">{hostName}</span>
-        <span className="text-indigo-500 font-medium">{timeStr}</span>
+    <Marker
+      longitude={ping.lng}
+      latitude={ping.lat}
+      anchor="bottom"
+      onClick={(e) => { e.originalEvent.stopPropagation(); onClick() }}
+    >
+      <div className="flex flex-col items-center cursor-pointer group">
+        {/* Pill */}
+        <div className="flex items-center gap-1.5 bg-indigo-500 rounded-2xl px-3 py-2 shadow-lg group-hover:bg-indigo-600 transition-colors select-none"
+          style={{ whiteSpace: 'nowrap' }}
+        >
+          <svg className="w-3 h-3 text-indigo-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span className="text-white font-semibold text-xs"
+            style={{ maxWidth: '90px', overflow: 'hidden', textOverflow: 'ellipsis' }}
+          >
+            {ping.place_name}
+          </span>
+          <span className="text-indigo-200 text-xs font-medium">{timeStr}</span>
+        </div>
+        {/* Triangle pointer */}
+        <div style={{
+          width: 0, height: 0,
+          borderLeft: '5px solid transparent',
+          borderRight: '5px solid transparent',
+          borderTop: '6px solid #6366f1',
+        }} />
       </div>
     </Marker>
   )
@@ -63,7 +80,6 @@ export default function MapView({ pings, onPingClick, onMapClick }: MapViewProps
       onMove={(evt) => setViewState(evt.viewState)}
       style={{ width: '100%', height: '100%' }}
       mapStyle={MAP_STYLE}
-      cursor={onMapClick ? 'crosshair' : 'grab'}
       onClick={(evt) => onMapClick?.(evt.lngLat.lat, evt.lngLat.lng)}
     >
       <NavigationControl position="top-right" />
