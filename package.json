@@ -12,13 +12,13 @@
     "@hookform/resolvers": "^3.9.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.45.0",
-    "@vis.gl/react-google-maps": "^1.4.0",
     "date-fns": "^4.1.0",
+    "mapbox-gl": "^3.23.1",
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.53.0",
-    "use-places-autocomplete": "^4.0.1",
+    "react-map-gl": "^8.1.1",
     "zod": "^3.23.0"
   },
   "devDependencies": {
