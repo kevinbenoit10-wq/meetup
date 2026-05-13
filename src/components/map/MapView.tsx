@@ -1,7 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
-import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox'
+import Map, { Marker, NavigationControl } from 'react-map-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { format } from 'date-fns'
 import type { Ping } from '@/lib/types'
